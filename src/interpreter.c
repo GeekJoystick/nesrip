@@ -61,6 +61,8 @@ int handleHashCommand() {
 	memcpy(tempHashString, token, SIZE_OF_SHA_256_HASH * 2);
 	tempHashString[SIZE_OF_SHA_256_HASH * 2] = 0;
 
+	strupr(tempHashString);
+
 	if (strcmp(hashString, tempHashString) == 0) {
 		printf("Matched hash!\n");
 		foundRom = true;
@@ -110,7 +112,13 @@ int handleCompressionCommand() {
 
 void interpretDatabase() {
 	uint8_t hash[SIZE_OF_SHA_256_HASH];
-	calc_sha_256(hash, rom.data, rom.size);
+
+	if (rom.data[0] == 'N' && rom.data[1] == 'E' && rom.data[2] == 'S' && rom.data[3] == 0x1A) {
+		calc_sha_256(hash, rom.data + 0x10, rom.size - 0x10);
+    }
+	else{
+		calc_sha_256(hash, rom.data, rom.size);
+	}
 
 	hashString = (char*)malloc(sizeof(char) * SIZE_OF_SHA_256_HASH * 2 + 1);
 	tempHashString = (char*)malloc(sizeof(char) * SIZE_OF_SHA_256_HASH * 2 + 1);

@@ -20,15 +20,6 @@ Rom readRom(char* romName) {
         result.size = -1;
         return result;
     }
-
-    if (result.data[0] != 'N' || result.data[1] != 'E' || result.data[2] != 'S' || result.data[3] != 0x1A) {
-        printf("Error: File is not a NES ROM.\n");
-        free(result.data);
-
-        result.data = (char*)NULL;
-        result.size = -1;
-        return result;
-    }
     
     return result;
 }

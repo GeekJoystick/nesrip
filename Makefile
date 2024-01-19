@@ -5,7 +5,3 @@ all:
 
 clean:
 	del *.exe
-
-run:
-	./$(OUTPUT) './roms/Spacegulls-1.1.nes'
-	pause
