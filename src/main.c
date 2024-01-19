@@ -12,6 +12,8 @@
 #include "sha_2/sha-256.h"
 
 Rom rom;
+char* programName;
+char* outputFolder;
 char* outputFilename = NULL;
 char* compressionType = "raw";
 char* patternSize = "1";
@@ -21,12 +23,16 @@ int patternOverride = false;
 int paletteOverride = false;
 
 void quitProgram(int code) {
+	if (outputFolder != NULL){
+		free(outputFolder);
+	}
+
 	freeRom(&rom);
 	exit(code);
 }
 
 int main(int argc, char** argv){
-	findProgramName(argv[0]);
+	programName = getFilename(argv[0]);
 
 	if (argc < 2) {
 		printNoInput();
@@ -51,8 +57,24 @@ int main(int argc, char** argv){
 		}
 	}
 
+	char* inputFilename = getFilename(inputRomName);
+	int outputFolderLength = getFilenameLengthWithoutExtension(inputFilename);
+
+	outputFolder = (char*)malloc(outputFolderLength + 9);
+
+	if (outputFolder == NULL){
+		printf("Error: Couldn't allocate memory for output folder string.\n");
+		quitProgram(0);
+	}
+
+	memcpy(outputFolder, "output/", 7);
+	memcpy(outputFolder+7, inputFilename, outputFolderLength);
+	outputFolder[outputFolderLength + 7] = '/';
+	outputFolder[outputFolderLength + 8] = 0;
+
 	printf("Ensuring output folder exists.\n");
 	CreateDirectoryA("output", 0);
+	CreateDirectoryA(outputFolder, 0);
 
 	if (argc > 2) {
 		if (handleAdditionnalArgs(1, argc - 2, argv + 2)) {

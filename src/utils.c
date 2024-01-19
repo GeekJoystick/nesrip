@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include "utils.h"
 #include <math.h>
+#include <string.h>
+#include "utils.h"
 
 str2int_errno str2int(int* out, char* s, int base) {
     char* end;
@@ -68,4 +69,32 @@ int readAllBytesFromFile(char* filename, char** output, int zeroTerminate) {
 
     *output = result;
     return filelen;
+}
+
+char* getFilename(char* path) {
+	char* searchPointer = path + strlen(path) - 1;
+
+	while (searchPointer >= path) {
+		if (searchPointer[0] == '\\' || searchPointer[0] == '/') {
+			return searchPointer + 1;
+		}
+
+		searchPointer--;
+	}
+
+    return path;
+}
+
+int getFilenameLengthWithoutExtension(char* filename) {
+    char* searchPointer = filename + strlen(filename) - 1;
+
+	while (searchPointer >= filename) {
+		if (searchPointer[0] == '.') {
+			return searchPointer - filename;
+		}
+
+		searchPointer--;
+	}
+
+    return strlen(filename);
 }

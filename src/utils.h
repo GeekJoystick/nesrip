@@ -15,5 +15,7 @@ str2int_errno str2int(int* out, char* s, int base);
 int numberOfSetBits(int i);
 int numDigits(int n);
 int readAllBytesFromFile(char* filename, char** output, int zeroTerminate);
+char* getFilename(char* path);
+int getFilenameLengthWithoutExtension(char* filename);
 
 #endif

@@ -2,21 +2,6 @@
 #include <string.h>
 #include "logger.h"
 
-char* programName;
-
-void findProgramName(char* programPath) {
-	char* searchPointer = programPath + strlen(programPath) - 1;
-
-	while (searchPointer >= programPath) {
-		if (searchPointer[0] == '\\' || searchPointer[0] == '/') {
-			programName = searchPointer + 1;
-			break;
-		}
-
-		searchPointer--;
-	}
-}
-
 void printProgamName() {
 	printf(programName);
 }

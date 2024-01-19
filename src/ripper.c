@@ -7,12 +7,13 @@
 #include "logger.h"
 #include "utils.h"
 #include "ripper.h"
+#include "globals.h"
 
 char paletteData[] = {
 	0, 0, 0, 255,
 	239, 239, 239, 255,
 	222, 123, 82, 255,
-	0, 66, 198, 255
+	41, 115, 156, 255
 };
 
 void clearTilesheet(char* sheet) {
@@ -55,11 +56,12 @@ void drawPixel(char* sheet, int x, int y, char* color) {
 }
 
 char* allocOverloadedFilename(char* filename, int suffix, char* paletteDescription) {
+	int lenOutputFolder = strlen(outputFolder);
 	int lenFilename = strlen(filename);
 	int lenPaletteDescription = strlen(paletteDescription);
 	int lenFileSuffix = numDigits(suffix) + 1;
 
-	char* result = (char*)malloc(lenFilename + lenFileSuffix + lenPaletteDescription + 13);
+	char* result = (char*)malloc(lenOutputFolder + lenFilename + lenFileSuffix + lenPaletteDescription + 6);
 
 	if (result == NULL) {
 		printf("Error: Couldn't allocate memory for filename data.\n");
@@ -68,8 +70,8 @@ char* allocOverloadedFilename(char* filename, int suffix, char* paletteDescripti
 
 	char* outputFilenamePtr = result;
 
-	memcpy(outputFilenamePtr, "output/", 7);
-	outputFilenamePtr += 7;
+	memcpy(outputFilenamePtr, outputFolder, lenOutputFolder);
+	outputFilenamePtr += lenOutputFolder;
 	memcpy(outputFilenamePtr, filename, lenFilename);
 	outputFilenamePtr += lenFilename;
 	sprintf(outputFilenamePtr, "-%d", suffix);
@@ -85,13 +87,14 @@ char* allocOverloadedFilename(char* filename, int suffix, char* paletteDescripti
 }
 
 char* allocSectionFilename(char* prefix, char* sectionStart, char* sectionEnd, int suffix, char* paletteDescription) {
+	int lenOutputFolder = strlen(outputFolder);
 	int lenFilePrefix = strlen(prefix);
 	int lenSectionStart = strlen(sectionStart);
 	int lenSectionEnd = strlen(sectionEnd);
 	int lenPaletteDescription = strlen(paletteDescription);
 	int lenFileSuffix = numDigits(suffix) + 1;
 
-	char* result = (char*)malloc(lenSectionStart + lenSectionEnd + lenFilePrefix + lenFileSuffix + lenPaletteDescription + 14);
+	char* result = (char*)malloc(lenOutputFolder + lenSectionStart + lenSectionEnd + lenFilePrefix + lenFileSuffix + lenPaletteDescription + 7);
 
 	if (result == NULL) {
 		printf("Error: Couldn't allocate memory for filename data.\n");
@@ -100,8 +103,8 @@ char* allocSectionFilename(char* prefix, char* sectionStart, char* sectionEnd, i
 
 	char* outputFilenamePtr = result;
 
-	memcpy(outputFilenamePtr, "output/", 7);
-	outputFilenamePtr += 7;
+	memcpy(outputFilenamePtr, outputFolder, lenOutputFolder);
+	outputFilenamePtr += lenOutputFolder;
 	memcpy(outputFilenamePtr, prefix, lenFilePrefix);
 	outputFilenamePtr += lenFilePrefix;
 	memcpy(outputFilenamePtr, sectionStart, lenSectionStart);

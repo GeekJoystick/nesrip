@@ -3,6 +3,8 @@
 #include "rom.h"
 
 extern Rom rom;
+extern char* programName;
+extern char* outputFolder;
 extern char* outputFilename;
 extern char* compressionType;
 extern char* patternSize;
