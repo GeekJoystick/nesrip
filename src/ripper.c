@@ -7,7 +7,6 @@
 #include "logger.h"
 #include "utils.h"
 #include "ripper.h"
-#include "globals.h"
 
 char paletteData[] = {
 	0, 0, 0, 255,
@@ -16,20 +15,42 @@ char paletteData[] = {
 	41, 115, 156, 255
 };
 
-void clearTilesheet(char* sheet) {
-	memset(sheet, 0, TILESHEET_WIDTH * TILESHEET_HEIGHT * 4);
-}
+typedef struct{
+	Rom* rom;
+	ExtractionArguments* args;
+	int sectionStart;
+	int sectionEnd;
+	int patternSize;
+	int patternDirection;
 
-char* allocTilesheet() {
-	char* result = (char*)malloc(TILESHEET_WIDTH * TILESHEET_HEIGHT * 4);
+	char* sheet;
+	int tx;
+	int ty;
+	int stx;
+	int sty;
+	int maxX;
+	int maxY;
+} ExtractionContext;
 
-	if (result == NULL) {
-		printf("Error: Couldn't allocate memory for tilesheet.\n");
-		return NULL;
+int patternHorizontal = false;
+
+int allocTilesheet(ExtractionContext* context, int tileCount) {
+	int width = 128;
+	int height = (tileCount / (16 * context->patternSize)) * context->patternSize * 8;
+
+	if (tileCount % (16 * context->patternSize) != 0){
+		height += context->patternSize * 8;
 	}
 
-	clearTilesheet(result);
-	return result;
+	context->sheet = (char*)malloc(width * height * 4);
+
+	if (context->sheet == NULL) {
+		printf("Error: Couldn't allocate memory for tilesheet.\n");
+		return 1;
+	}
+
+	memset(context->sheet, 0, width * height * 4);
+	return 0;
 }
 
 char* getColor(char color, char* paletteDescription) {
@@ -51,17 +72,17 @@ char* getColor(char color, char* paletteDescription) {
 
 void drawPixel(char* sheet, int x, int y, char* color) {
 	for (int i = 0; i < 4; i++) {
-		sheet[(y * TILESHEET_WIDTH + x) * 4 + i] = color[i];
+		sheet[(y * 128 + x) * 4 + i] = color[i];
 	}
 }
 
-char* allocOverloadedFilename(char* filename, int suffix, char* paletteDescription) {
-	int lenOutputFolder = strlen(outputFolder);
-	int lenFilename = strlen(filename);
-	int lenPaletteDescription = strlen(paletteDescription);
-	int lenFileSuffix = numDigits(suffix) + 1;
+char* allocOverloadedFilename(ExtractionContext* context) {
+	ExtractionArguments* args = context->args;
+	int lenOutputFolder = strlen(args->outputFolder);
+	int lenFilename = strlen(args->filenameOverload);
+	int lenPaletteDescription = strlen(args->paletteDescription);
 
-	char* result = (char*)malloc(lenOutputFolder + lenFilename + lenFileSuffix + lenPaletteDescription + 6);
+	char* result = (char*)malloc(lenOutputFolder + lenFilename + lenPaletteDescription + 6);
 
 	if (result == NULL) {
 		printf("Error: Couldn't allocate memory for filename data.\n");
@@ -70,14 +91,12 @@ char* allocOverloadedFilename(char* filename, int suffix, char* paletteDescripti
 
 	char* outputFilenamePtr = result;
 
-	memcpy(outputFilenamePtr, outputFolder, lenOutputFolder);
+	memcpy(outputFilenamePtr, args->outputFolder, lenOutputFolder);
 	outputFilenamePtr += lenOutputFolder;
-	memcpy(outputFilenamePtr, filename, lenFilename);
+	memcpy(outputFilenamePtr, args->filenameOverload, lenFilename);
 	outputFilenamePtr += lenFilename;
-	sprintf(outputFilenamePtr, "-%d", suffix);
-	outputFilenamePtr += lenFileSuffix;
 	*(outputFilenamePtr++) = '.';
-	memcpy(outputFilenamePtr, paletteDescription, lenPaletteDescription);
+	memcpy(outputFilenamePtr, args->paletteDescription, lenPaletteDescription);
 	outputFilenamePtr += lenPaletteDescription;
 	memcpy(outputFilenamePtr, ".png", 4);
 	outputFilenamePtr += 4;
@@ -86,15 +105,14 @@ char* allocOverloadedFilename(char* filename, int suffix, char* paletteDescripti
 	return result;
 }
 
-char* allocSectionFilename(char* prefix, char* sectionStart, char* sectionEnd, int suffix, char* paletteDescription) {
-	int lenOutputFolder = strlen(outputFolder);
-	int lenFilePrefix = strlen(prefix);
-	int lenSectionStart = strlen(sectionStart);
-	int lenSectionEnd = strlen(sectionEnd);
-	int lenPaletteDescription = strlen(paletteDescription);
-	int lenFileSuffix = numDigits(suffix) + 1;
+char* allocSectionFilename(ExtractionContext* context) {
+	ExtractionArguments* args = context->args;
+	int lenOutputFolder = strlen(args->outputFolder);
+	int lenSectionStart = strlen(args->sectionStartString);
+	int lenSectionEnd = strlen(args->sectionEndString);
+	int lenPaletteDescription = strlen(args->paletteDescription);
 
-	char* result = (char*)malloc(lenOutputFolder + lenSectionStart + lenSectionEnd + lenFilePrefix + lenFileSuffix + lenPaletteDescription + 7);
+	char* result = (char*)malloc(lenOutputFolder + lenSectionStart + lenSectionEnd + lenPaletteDescription + 9);
 
 	if (result == NULL) {
 		printf("Error: Couldn't allocate memory for filename data.\n");
@@ -103,19 +121,17 @@ char* allocSectionFilename(char* prefix, char* sectionStart, char* sectionEnd, i
 
 	char* outputFilenamePtr = result;
 
-	memcpy(outputFilenamePtr, outputFolder, lenOutputFolder);
+	memcpy(outputFilenamePtr, args->outputFolder, lenOutputFolder);
 	outputFilenamePtr += lenOutputFolder;
-	memcpy(outputFilenamePtr, prefix, lenFilePrefix);
-	outputFilenamePtr += lenFilePrefix;
-	memcpy(outputFilenamePtr, sectionStart, lenSectionStart);
+	memcpy(outputFilenamePtr, args->sectionStartString, lenSectionStart);
 	outputFilenamePtr += lenSectionStart;
 	*(outputFilenamePtr++) = '_';
-	memcpy(outputFilenamePtr, sectionEnd, lenSectionEnd);
+	memcpy(outputFilenamePtr, args->sectionEndString, lenSectionEnd);
 	outputFilenamePtr += lenSectionEnd;
-	sprintf(outputFilenamePtr, "-%d", suffix);
-	outputFilenamePtr += lenFileSuffix;
+	*(outputFilenamePtr++) = '_';
+	*(outputFilenamePtr++) = args->patternDirectionString[0];
 	*(outputFilenamePtr++) = '.';
-	memcpy(outputFilenamePtr, paletteDescription, lenPaletteDescription);
+	memcpy(outputFilenamePtr, args->paletteDescription, lenPaletteDescription);
 	outputFilenamePtr += lenPaletteDescription;
 	memcpy(outputFilenamePtr, ".png", 4);
 	outputFilenamePtr += 4;
@@ -124,14 +140,14 @@ char* allocSectionFilename(char* prefix, char* sectionStart, char* sectionEnd, i
 	return result;
 }
 
-int writeOutput(char* outputData, int width, int height, char* sectionStartString, char* sectionEndString, char* patternSizeString, char* filePrefix, int fileSuffix, char* paletteDescription, char* filenameOverload) {
+int writeOutput(char* outputData, int width, int height, ExtractionContext* context) {
 	char* outputFilename = NULL;
 
-	if (filenameOverload != NULL) {
-		outputFilename = allocOverloadedFilename(filenameOverload, fileSuffix, paletteDescription);
+	if (context->args->filenameOverload != NULL) {
+		outputFilename = allocOverloadedFilename(context);
 	}
 	else {
-		outputFilename = allocSectionFilename(filePrefix, sectionStartString, sectionEndString, fileSuffix, paletteDescription);
+		outputFilename = allocSectionFilename(context);
 	}
 
 	if (outputFilename == NULL) {
@@ -142,7 +158,7 @@ int writeOutput(char* outputData, int width, int height, char* sectionStartStrin
 	printf(outputFilename);
 	printf("\".\n");
 
-	if (!stbi_write_png(outputFilename, width, height, 4, outputData, TILESHEET_WIDTH * 4)) {
+	if (!stbi_write_png(outputFilename, width, height, 4, outputData, 128 * 4)) {
 		printf("An error occurred while writing to output file ");
 		printf(outputFilename);
 		printf(".\n");
@@ -154,55 +170,107 @@ int writeOutput(char* outputData, int width, int height, char* sectionStartStrin
 	return 1;
 }
 
-int getSectionDetails(Rom* rom, char* sectionStartString, char* sectionEndString, char* patternSizeString, int* sectionStart, int* sectionEnd, int* patternSize) {
+int getSectionDetails(Rom* rom, ExtractionContext* context) {
+	ExtractionArguments* args = context->args;
 
-	if (str2int(sectionStart, sectionStartString, 16) != STR2INT_SUCCESS || *sectionStart < 0 || *sectionStart >= rom->size) {
+	if (str2int(&(context->sectionStart), args->sectionStartString, 16) != STR2INT_SUCCESS || context->sectionStart < 0 || context->sectionStart >= rom->size) {
 		printf("Error: Invalid section start address.\n");
 		return 0;
 	}
 
-	if (str2int(sectionEnd, sectionEndString, 16) != STR2INT_SUCCESS || *sectionEnd < 0 || *sectionEnd >= rom->size) {
+	if (str2int(&(context->sectionEnd), args->sectionEndString, 16) != STR2INT_SUCCESS || context->sectionEnd < 0 || context->sectionEnd >= rom->size) {
 		printf("Error: Invalid section end address.\n");
 		return 0;
 	}
 
-	if (str2int(patternSize, patternSizeString, 10) != STR2INT_SUCCESS || numberOfSetBits(*patternSize) > 1 || (unsigned int)*patternSize > MAX_PATTERN_SIZE) {
+	if (str2int(&(context->patternSize), args->patternSizeString, 10) != STR2INT_SUCCESS || numberOfSetBits(context->patternSize) > 1 || (unsigned int)context->patternSize > MAX_PATTERN_SIZE) {
 		printf("Error: Invalid pattern size.\n");
 		return 0;
 	}
 
-	if (*sectionEnd < *sectionStart) {
+	if (context->sectionEnd < context->sectionStart) {
 		printf("Error: Section end is placed before start.\n");
 		return 0;
+	}
+
+	if (strcmp(args->patternDirectionString, "H") == 0) {
+		context->patternDirection = false;
+	}
+	else if (strcmp(args->patternDirectionString, "V") == 0) {
+		context->patternDirection = true;
+	}
+	else {
+		printf("Error: Invalid pattern direction. Use \"H\" or \"V\".\n");
 	}
 
 	return 1;
 }
 
-int ripSectionRaw(Rom* rom, char* sectionStartString, char* sectionEndString, char* patternSizeString, char* paletteDescription, char* filePrefix, char* filenameOverload) {
+void writeLine(ExtractionContext* context, int y, char low, char high){
+	int stx = (context->patternDirection) ? context->sty : context->stx;
+	int sty = (context->patternDirection) ? context->stx : context->sty;
+
+	int px;
+	int py = (context->ty * context->patternSize + sty) * 8 + y;
+
+	for (int x = 0; x < 8; x++) {
+		char c = ((high & 1) << 1) | (low & 1);
+		high >>= 1;
+		low >>= 1;
+
+		px = (context->tx * context->patternSize + stx) * 8 + 7 - x;
+		drawPixel(context->sheet, px, py, getColor(c, context->args->paletteDescription));
+	}
+
+	if (px + 7 > context->maxX){
+		context->maxX = px + 7;
+	}
+
+	if (py > context->maxY){
+		context->maxY = py;
+	}
+}
+
+void incrementTilePos(ExtractionContext* context){
+	context->stx++;
+	if (context->stx >= context->patternSize) {
+		context->stx = 0;
+		context->sty++;
+
+		if (context->sty >= context->patternSize) {
+			context->sty = 0;
+
+			context->tx++;
+			if (context->tx >= 16 / context->patternSize) {
+				context->tx = 0;
+				context->ty++;
+			}
+		}
+	}
+}
+
+int ripSectionRaw(Rom* rom, ExtractionContext* context) {
 	printf("Ripping raw section from ");
-	printf(sectionStartString);
+	printf(context->args->sectionStartString);
 	printf(" to ");
-	printf(sectionEndString);
+	printf(context->args->sectionEndString);
 	printf(" in ROM.\n");
 
-	int sectionStart = 0;
-	int sectionEnd = 0;
-	int patternSize = 0;
-
-	if (!getSectionDetails(rom, sectionStartString, sectionEndString, patternSizeString, &sectionStart, &sectionEnd, &patternSize)) {
+	if (!getSectionDetails(rom, context)) {
 		return 0;
 	}
 
-	char* sheet = allocTilesheet();
-
-	if (sheet == NULL) {
-		return 0;
-	}
-
-	if ((sectionEnd - sectionStart + 1) % 16 != 0) {
+	if (((context->sectionEnd - context->sectionStart) + 1) % 16 != 0) {
 		printf("Warning: Targeted section has some extra bytes that cannot be used to make a full tile.\n         Rounding down section end address.\n");
-		sectionEnd -= (sectionEnd - sectionStart + 1) % 16;
+		context->sectionEnd -= (context->sectionEnd - context->sectionStart + 1) % 16;
+	}
+
+	if (allocTilesheet(context, (context->sectionEnd - context->sectionStart + 1) / 16)){
+		return 0;
+	}
+
+	if (context->sheet == NULL) {
+		return 0;
 	}
 
 	int sheetCount = 0;
@@ -211,83 +279,42 @@ int ripSectionRaw(Rom* rom, char* sectionStartString, char* sectionEndString, ch
 	int stx = 0;
 	int sty = 0;
 
-	int maxX = 0;
-	int maxY = 0;
-
-	char* sectionData = rom->data + sectionStart;
-	char* endPointer = rom->data + sectionEnd;
+	char* sectionData = rom->data + context->sectionStart;
+	char* endPointer = rom->data + context->sectionEnd;
 
 	while (sectionData < endPointer) {
 		for (int y = 0; y < 8; y++) {
 			char low = sectionData[y];
 			char high = sectionData[y + 8];
-
-			for (int x = 0; x < 8; x++) {
-				char c = ((high & 1) << 1) | (low & 1);
-				high >>= 1;
-				low >>= 1;
-
-				int px = (tx * patternSize + stx) * 8 + 7 - x;
-				int py = (ty * patternSize + sty) * 8 + y;
-
-				if (px > maxX) {
-					maxX = px;
-				}
-
-				if (py > maxY) {
-					maxY = py;
-				}
-
-				drawPixel(sheet, px, py, getColor(c, paletteDescription));
-			}
+			writeLine(context, y, low, high);
 		}
 
-		stx++;
-		if (stx >= patternSize) {
-			stx = 0;
-			sty++;
-
-			if (sty >= patternSize) {
-				sty = 0;
-
-				tx++;
-				if (tx >= 16 / patternSize) {
-					tx = 0;
-					ty++;
-					if (ty >= 16 / patternSize) {
-						ty = 0;
-
-						writeOutput(sheet, TILESHEET_WIDTH, TILESHEET_HEIGHT, sectionStartString, sectionEndString, patternSizeString, filePrefix, sheetCount++, paletteDescription, filenameOverload);
-						clearTilesheet(sheet);
-					}
-				}
-			}
-		}
-
-		
+		incrementTilePos(context);
 		sectionData += 16;
 	}
 
-	if (stx + sty + tx + ty > 0) {
-		writeOutput(sheet, maxX + 1, maxY + 1, sectionStartString, sectionEndString, patternSizeString, filePrefix, sheetCount, paletteDescription, filenameOverload);
-	}
-
-	free(sheet);
+	writeOutput(context->sheet, context->maxX, context->maxY, context);
+	free(context->sheet);
 
 	return 1;
 }
 
-int ripSection(Rom* rom, char* sectionStartString, char* sectionEndString, char* patternSizeString, char* paletteDescription, char* compressionType, char* filePrefix, char* filenameOverload)
+int ripSection(Rom* rom, ExtractionArguments* arguments)
 {
-	if (strcmp(compressionType, "raw") == 0) {
-		if (!ripSectionRaw(rom, sectionStartString, sectionEndString, patternSizeString, paletteDescription, filePrefix, filenameOverload)) {
-			printf("An error occured during ripping.");
+	ExtractionContext context = {
+		rom,
+		arguments
+	};
+
+	if (strcmp(arguments->compressionType, "raw") == 0) {
+		if (!ripSectionRaw(rom, &context)) {
+			printf("An error occured during ripping.\n");
 			return 0;
 		}
 	}
 	else {
 		printf("Error: Unknown compression type \"");
-		printf(compressionType);
+		printf(arguments->compressionType);
 		printf("\".\n");
 		return 0;
 	}

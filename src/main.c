@@ -17,6 +17,7 @@ char* outputFolder;
 char* outputFilename = NULL;
 char* compressionType = "raw";
 char* patternSize = "1";
+char* patternDirection = "H";
 char* paletteDescription = "bwot";
 char* descriptorFilename = "nes_gfxdb.txt";
 int patternOverride = false;

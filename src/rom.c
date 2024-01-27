@@ -6,25 +6,22 @@
 Rom readRom(char* romName) {
     Rom result = {(char*)NULL, -1};
 
-    result.size = readAllBytesFromFile(romName, &result.data, false);
+    result.size = readAllBytesFromFile(romName, &result.originalData, false);
+    result.data = result.originalData;
 
     if (result.size < 0) {
         return result;
     }
     
-    if (result.size < 4) {
-        printf("Error: File is not a NES ROM.\n");
-        free(result.data);
-
-        result.data = (char*)NULL;
-        result.size = -1;
-        return result;
+    if (result.data[0] == 'N' && result.data[1] == 'E' && result.data[2] == 'S' && result.data[3] == 0x1A) {
+        result.data += 0x10;
+        result.size -= 0x10;
     }
     
     return result;
 }
 
 void freeRom(Rom* rom) {
-    if (rom->data == NULL) return;
-    free(rom->data);
+    if (rom->originalData == NULL) return;
+    free(rom->originalData);
 }

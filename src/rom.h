@@ -2,6 +2,7 @@
 #define ROM_H
 
 typedef struct {
+	char* originalData;
 	char* data;
 	int size;
 } Rom;

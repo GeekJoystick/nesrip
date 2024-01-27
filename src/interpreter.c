@@ -43,7 +43,7 @@ int removeCarriageReturns(char* string, int length) {
 		hits++;
 	}
 
-	memset(string + length - hits, 0, hits);
+	memset(string + length - hits - 1, 0, hits);
 	return length - hits;
 }
 
@@ -72,12 +72,15 @@ int handleHashCommand() {
 }
 
 int handlePatternCommand() {
-	char* token;
-	PULL_TOKEN("Pattern", token);
+	char* size, * direction;
+	PULL_TOKEN("Pattern", size);
+	PULL_TOKEN("Pattern", direction);
 
 	if (patternOverride) return 0;
 
-	patternSize = token;
+	patternSize = size;
+	patternDirection = direction;
+
 	return 0;
 }
 
@@ -98,7 +101,18 @@ int handleSectionCommand() {
 	PULL_TOKEN("Section", sectionStart);
 	PULL_TOKEN("Section", sectionEnd);
 
-	ripSection(&rom, sectionStart, sectionEnd, patternSize, paletteDescription, compressionType, prefix, NULL);
+	ExtractionArguments args = {
+		sectionStart,
+		sectionEnd,
+		patternSize,
+		patternDirection,
+		paletteDescription,
+		compressionType,
+		outputFolder,
+		prefix
+	};
+
+	ripSection(&rom, &args);
 	return 0;
 }
 
@@ -112,13 +126,7 @@ int handleCompressionCommand() {
 
 void interpretDatabase() {
 	uint8_t hash[SIZE_OF_SHA_256_HASH];
-
-	if (rom.data[0] == 'N' && rom.data[1] == 'E' && rom.data[2] == 'S' && rom.data[3] == 0x1A) {
-		calc_sha_256(hash, rom.data + 0x10, rom.size - 0x10);
-    }
-	else{
-		calc_sha_256(hash, rom.data, rom.size);
-	}
+	calc_sha_256(hash, rom.data, rom.size);
 
 	hashString = (char*)malloc(sizeof(char) * SIZE_OF_SHA_256_HASH * 2 + 1);
 	tempHashString = (char*)malloc(sizeof(char) * SIZE_OF_SHA_256_HASH * 2 + 1);

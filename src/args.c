@@ -39,7 +39,18 @@ int handleDirectSectionRipArg(int pass, int* argc, char*** argv) {
 		return 0;
 	}
 
-	ripSection(&rom, (*argv)[1], (*argv)[2], patternSize, paletteDescription, compressionType, "", outputFilename);
+	ExtractionArguments args = {
+		(*argv)[1],
+		(*argv)[2],
+		patternSize,
+		patternDirection,
+		paletteDescription,
+		compressionType,
+		outputFolder,
+		outputFilename
+	};
+
+	ripSection(&rom, &args);
 	return 1;
 }
 
