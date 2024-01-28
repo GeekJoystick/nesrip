@@ -68,18 +68,19 @@ int handleOutputArg(int pass, int* argc, char*** argv) {
 	return 0;
 }
 
-int handlePatternSizeArg(int pass, int* argc, char*** argv) {
-	CHECK_ARGC("-p", 2);
+int handlePatternArg(int pass, int* argc, char*** argv) {
+	CHECK_ARGC("-p", 3);
 
 	if (pass != 0) {
-		INC(2);
+		INC(3);
 		return 0;
 	}
 
 	patternSize = (*argv)[1];
+	patternDirection = (*argv)[2];
 	patternOverride = true;
 
-	INC(2);
+	INC(3);
 	return 0;
 }
 
@@ -154,7 +155,7 @@ int handleAdditionnalArgs(int pass, int argc, char** argv) {
 
 		CHECK_ARG("-S", handleDirectSectionRipArg);
 		CHECK_ARG("-o", handleOutputArg);
-		CHECK_ARG("-p", handlePatternSizeArg);
+		CHECK_ARG("-p", handlePatternArg);
 		CHECK_ARG("-c", handleCompressionArg);
 		CHECK_ARG("-i", handlePaletteDescriptionArg);
 		CHECK_ARG("-d", handleDescriptorFilenameArg);

@@ -11,12 +11,12 @@ void printHelp() {
 	printProgamName();
 	printf(" file [arguments]\n");
 	printf("Arguments:\n");
-	printf(" -S {start address} {end address}        Directly rip graphics from specified memory in ROM.\n");
-	printf(" -o {filename}                           Output filename (without file extension) when using -S.\n");
-	printf(" -d {filename}                           Graphics database filename.\n");
-	printf(" -c {compression type, raw}              Graphics decompression algorithm.\n");
-	printf(" -p {pattern size, 1/2/4/8}              Set or override tile block size.\n");
-	printf(" -i {4 letter combination of b/o/t/w}    Set or override palette order for rendering.\n");
+	printf(" -S {start address} {end address}                 Directly rip graphics from specified memory in ROM.\n");
+	printf(" -o {filename}                                    Output filename (without file extension) when using -S.\n");
+	printf(" -d {filename}                                    Graphics database filename.\n");
+	printf(" -c {compression type, raw}                       Graphics decompression algorithm.\n");
+	printf(" -p {pattern size, 1/2/4/8/16} {direction, h/v}   Set or override tile block size and direction.\n");
+	printf(" -i {4 letter combination of b/o/t/w}             Set or override palette order for rendering.\n");
 }
 
 void printNoInput() {

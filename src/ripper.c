@@ -193,14 +193,14 @@ int getSectionDetails(Rom* rom, ExtractionContext* context) {
 		return 0;
 	}
 
-	if (strcmp(args->patternDirectionString, "H") == 0) {
+	if (strcmp(args->patternDirectionString, "h") == 0) {
 		context->patternDirection = false;
 	}
-	else if (strcmp(args->patternDirectionString, "V") == 0) {
+	else if (strcmp(args->patternDirectionString, "v") == 0) {
 		context->patternDirection = true;
 	}
 	else {
-		printf("Error: Invalid pattern direction. Use \"H\" or \"V\".\n");
+		printf("Error: Invalid pattern direction. Use \"h\" or \"v\".\n");
 	}
 
 	return 1;

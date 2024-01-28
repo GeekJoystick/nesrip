@@ -28,12 +28,12 @@ Pre-built binaries can be downloaded from the [GitHub Releases section](https://
 ```
 nesrip.exe file [arguments]                                                                                      
 Arguments:
--S {start address} {end address}        Directly rip graphics from specified memory in ROM.
--o {filename}                           Output filename (without file extension) when using -S.
--d {filename}                           Graphics database filename.
--c {compression type, raw}              Graphics decompression algorithm.
--p {pattern size, 1/2/4/8}              Set or override tile block size.   
--i {4 letter combination of b/o/t/w}    Set or override palette order for rendering.
+ -S {start address} {end address}                 Directly rip graphics from specified memory in ROM.
+ -o {filename}                                    Output filename (without file extension) when using -S.
+ -d {filename}                                    Graphics database filename.
+ -c {compression type, raw}                       Graphics decompression algorithm.
+ -p {pattern size, 1/2/4/8/16} {direction, h/v}   Set or override tile block size and direction.
+ -i {4 letter combination of b/o/t/w}             Set or override palette order for rendering.
 ```
 
 ### Graphics database file
@@ -54,7 +54,7 @@ The file contains a number of **description blocks**, each of them containing a 
 Hash {ROM SHA-256 hash}
 EndHash
 Section {Start address} {End address}
-Pattern {Pattern size, 1/2/4/8}
+Pattern {Pattern size, 1/2/4/8/16} {Direction, h/v}
 Palette {4 letter combination of b/o/t/w}
 Compression {compression type, raw}
 ```
@@ -72,17 +72,17 @@ Compression {compression type, raw}
 ```
 //Spacegulls
 Hash B69BD1809E26400336AF288BC04403C00D77030B931BC31875594C9A0AE92F67
-Pattern 1
+Pattern 1 h
 Palette botw
-Section bg 00010 1000F
+Section bg 00000 FFFFF
 EndHash
 
 //Micro Mages
 Hash A4B5B736A84B260314C18783381FE2DCA7B803F7C29E78FB403A0F9087A7E570
-Pattern 1
+Pattern 1 v
 Palette btow
-Section spr 8010 900F
-Section bg 9010 A00F
+Section spr 8000 8FFF
+Section bg 9000 9FFF
 EndHash
 
 ...
@@ -94,8 +94,16 @@ EndHash
 
 ## Version History
 
+* 0.2
+	* Made ROM headers be ignored from any operation.
+	* Hashes are now case insensitive.
+	* Made output files go into a folder named after the input ROM.
+	* Added batch files for processing multiple ROMs.
+	* Added pattern directionnality.
+	* Sheets will now extend vertically instead of splitting in multiple sheets.
+	* Added a pattern size of 16 to allow for fully vertical 128x128 sections.
 * 0.1
-	* Initial Release
+	* Initial Release.
 
 ## License
 
