@@ -293,7 +293,7 @@ int ripSectionRaw(Rom* rom, ExtractionContext* context) {
 		sectionData += 16;
 	}
 
-	writeOutput(context->sheet, context->maxX, context->maxY, context);
+	writeOutput(context->sheet, context->maxX + 1, context->maxY + 1, context);
 	free(context->sheet);
 
 	return 1;
