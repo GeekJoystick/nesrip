@@ -2,11 +2,13 @@
 #include <string.h>
 #include "logger.h"
 
-void printProgamName() {
+void printProgamName()
+{
 	printf(programName);
 }
 
-void printHelp() {
+void printHelp()
+{
 	printf("Usage: ");
 	printProgamName();
 	printf(" file [arguments]\n");
@@ -19,14 +21,16 @@ void printHelp() {
 	printf(" -i {4 letter combination of b/o/t/w}             Set or override palette order for rendering.\n");
 }
 
-void printNoInput() {
+void printNoInput()
+{
 	printf("No input ROM file specified.\n");
 	printf("Run ");
 	printProgamName();
 	printf(" --help to see usage information.\n");
 }
 
-void printInvalidArg(char* arg) {
+void printInvalidArg(char* arg)
+{
 	printf("Unrecognised argument: ");
 	printf(arg);
 	printf(".\n");
@@ -35,7 +39,8 @@ void printInvalidArg(char* arg) {
 	printf(" --help to see usage information.\n");
 }
 
-void printInvalidArgUsage(const char* arg, const char* error) {
+void printInvalidArgUsage(const char* arg, const char* error)
+{
 	printf("Invalid usage of argument ");
 	printf(arg);
 	printf(": ");
@@ -45,7 +50,8 @@ void printInvalidArgUsage(const char* arg, const char* error) {
 	printf(" --help to see usage information.\n");
 }
 
-void printInvalidDatabaseCommand(const char* arg, const char* error) {
+void printInvalidDatabaseCommand(const char* arg, const char* error)
+{
 	printf("Error: Invalid graphics database command \"");
 	printf(arg);
 	printf("\": ");

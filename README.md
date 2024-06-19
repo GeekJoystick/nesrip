@@ -34,6 +34,8 @@ Arguments:
  -c {compression type, raw}                       Graphics decompression algorithm.
  -p {pattern size, 1/2/4/8/16} {direction, h/v}   Set or override tile block size and direction.
  -i {4 letter combination of b/o/t/w}             Set or override palette order for rendering.
+ -b {bitplane type, 1/2}                          Set or override bitplane type
+ -r {redundancy check enable, true/false}         Set or override enabling redundancy checks
 ```
 
 ### Graphics database file
@@ -57,6 +59,9 @@ Section {Start address} {End address}
 Pattern {Pattern size, 1/2/4/8/16} {Direction, h/v}
 Palette {4 letter combination of b/o/t/w}
 Compression {compression type, raw}
+Bitplane {1/2}
+CheckRedundant {true/false}
+ClearRedundant
 ```
 
 ### Compression types
@@ -94,6 +99,10 @@ EndHash
 
 ## Version History
 
+* 0.3
+	* Added bitplane types
+	* Added 1bpp bitplane
+	* Added tile redundancy checks
 * 0.2
 	* Made ROM headers be ignored from any operation.
 	* Hashes are now case insensitive.

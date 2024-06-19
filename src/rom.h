@@ -1,7 +1,8 @@
 #ifndef ROM_H
 #define ROM_H
 
-typedef struct {
+typedef struct
+{
 	char* originalData;
 	char* data;
 	int size;

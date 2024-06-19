@@ -7,7 +7,8 @@
 #include <string.h>
 #include "utils.h"
 
-str2int_errno str2int(int* out, char* s, int base) {
+str2int_errno str2int(int* out, char* s, int base)
+{
     char* end;
     if (s[0] == '\0' || isspace(s[0]))
         return STR2INT_INCONVERTIBLE;
@@ -33,16 +34,20 @@ int numberOfSetBits(int i)
     return  i >> 24;
 }
 
-int numDigits(int n) {
-    if (n == 0) return 1;
+int numDigits(int n)
+{
+    if (n == 0)
+        return 1;
     return floor(log10(abs(n))) + 1;
 }
 
-int readAllBytesFromFile(char* filename, char** output, int zeroTerminate) {
+int readAllBytesFromFile(char* filename, char** output, int zeroTerminate)
+{
     FILE* fileptr = fopen(filename, "rb");
     long filelen;
 
-    if (fileptr == NULL) {
+    if (fileptr == NULL)
+    {
         printf("Error: Can't find file \"");
         printf(filename);
         printf("\".\n");
@@ -55,7 +60,8 @@ int readAllBytesFromFile(char* filename, char** output, int zeroTerminate) {
 
     char* result = (char*)malloc(filelen * sizeof(char));
 
-    if (result == NULL) {
+    if (result == NULL)
+    {
         printf("Error: Couldn't allocate memory for reading file data.\n");
         return -1;
     }
@@ -63,7 +69,8 @@ int readAllBytesFromFile(char* filename, char** output, int zeroTerminate) {
     fread(result, filelen, 1, fileptr);
     fclose(fileptr);
 
-    for (int i = filelen - zeroTerminate; i < filelen; i++) {
+    for (int i = filelen - zeroTerminate; i < filelen; i++)
+    {
         result[i] = 0;
     }
 
@@ -71,13 +78,14 @@ int readAllBytesFromFile(char* filename, char** output, int zeroTerminate) {
     return filelen;
 }
 
-char* getFilename(char* path) {
+char* getFilename(char* path)
+{
 	char* searchPointer = path + strlen(path) - 1;
 
-	while (searchPointer >= path) {
-		if (searchPointer[0] == '\\' || searchPointer[0] == '/') {
+	while (searchPointer >= path)
+    {
+		if (searchPointer[0] == '\\' || searchPointer[0] == '/')
 			return searchPointer + 1;
-		}
 
 		searchPointer--;
 	}
@@ -85,13 +93,14 @@ char* getFilename(char* path) {
     return path;
 }
 
-int getFilenameLengthWithoutExtension(char* filename) {
+int getFilenameLengthWithoutExtension(char* filename)
+{
     char* searchPointer = filename + strlen(filename) - 1;
 
-	while (searchPointer >= filename) {
-		if (searchPointer[0] == '.') {
+	while (searchPointer >= filename)
+    {
+		if (searchPointer[0] == '.')
 			return searchPointer - filename;
-		}
 
 		searchPointer--;
 	}

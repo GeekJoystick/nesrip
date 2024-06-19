@@ -11,10 +11,10 @@ char* tempHashString;
 int foundRom = false;
 
 #define CHECK_COMMAND(command, callback) \
-if (strcmp(token, command) == 0) { \
-	if (callback()) { \
+if (strcmp(token, command) == 0) \
+{ \
+	if (callback()) \
 		break; \
-	} \
 	\
 	token = updateToken(NULL); \
 	continue; \
@@ -23,21 +23,25 @@ if (strcmp(token, command) == 0) { \
 #define PULL_TOKEN(command, token) \
 token = updateToken(NULL); \
 \
-if (token == NULL) { \
+if (token == NULL) \
+{ \
 	printInvalidDatabaseCommand(command, "File ended"); \
 	return 1; \
 }
 
-char* updateToken(char* string) {
+char* updateToken(char* string)
+{
 	char* token = strtok(string, " \n");
 	return token;
 }
 
-int removeCarriageReturns(char* string, int length) {
+int removeCarriageReturns(char* string, int length)
+{
 	int hits = 0;
 	char* carriageReturn = strchr(string, 13);
 
-	while (carriageReturn != NULL) {
+	while (carriageReturn != NULL)
+	{
 		memcpy(carriageReturn, carriageReturn + 1, strlen(carriageReturn + 1));
 		carriageReturn = strchr(string, 13);
 		hits++;
@@ -47,11 +51,13 @@ int removeCarriageReturns(char* string, int length) {
 	return length - hits;
 }
 
-int handleHashCommand() {
+int handleHashCommand()
+{
 	char* token;
 	PULL_TOKEN("Hash", token);
 
-	if (strlen(token) < SIZE_OF_SHA_256_HASH * 2) {
+	if (strlen(token) < SIZE_OF_SHA_256_HASH * 2)
+	{
 		printf("Warning: Matching hash \"");
 		printf(token);
 		printf("\"  is too small.\n");
@@ -63,7 +69,8 @@ int handleHashCommand() {
 
 	strupr(tempHashString);
 
-	if (strcmp(hashString, tempHashString) == 0) {
+	if (strcmp(hashString, tempHashString) == 0)
+	{
 		printf("Matched hash!\n");
 		foundRom = true;
 	}
@@ -71,12 +78,14 @@ int handleHashCommand() {
 	return 0;
 }
 
-int handlePatternCommand() {
+int handlePatternCommand()
+{
 	char* size, * direction;
 	PULL_TOKEN("Pattern", size);
 	PULL_TOKEN("Pattern", direction);
 
-	if (patternOverride) return 0;
+	if (patternOverride)
+		return 0;
 
 	patternSize = size;
 	patternDirection = direction;
@@ -84,30 +93,36 @@ int handlePatternCommand() {
 	return 0;
 }
 
-int handlePaletteCommand() {
+int handlePaletteCommand()
+{
 	char* token;
 	PULL_TOKEN("Palette", token);
 
-	if (paletteOverride) return 0;
+	if (paletteOverride)
+		return 0;
 
 	paletteDescription = token;
 	return 0;
 }
 
-int handleSectionCommand() {
+int handleSectionCommand()
+{
 	char* prefix, * sectionStart, * sectionEnd;
 
 	PULL_TOKEN("Section", prefix);
 	PULL_TOKEN("Section", sectionStart);
 	PULL_TOKEN("Section", sectionEnd);
 
-	ExtractionArguments args = {
+	ExtractionArguments args =
+	{
 		sectionStart,
 		sectionEnd,
 		patternSize,
 		patternDirection,
 		paletteDescription,
 		compressionType,
+		bitplaneType,
+		checkRedundant,
 		outputFolder,
 		prefix
 	};
@@ -116,7 +131,8 @@ int handleSectionCommand() {
 	return 0;
 }
 
-int handleCompressionCommand() {
+int handleCompressionCommand()
+{
 	char* token;
 	PULL_TOKEN("Compression", token);
 
@@ -124,21 +140,57 @@ int handleCompressionCommand() {
 	return 0;
 }
 
-void interpretDatabase() {
+int handleBitplaneCommand()
+{
+	char* token;
+	PULL_TOKEN("Bitplane", token);
+
+	if (bitplaneOverride)
+		return 0;
+
+	bitplaneType = token;
+	return 0;
+}
+
+int handleCheckRedundantCommand()
+{
+	char* token;
+	PULL_TOKEN("CheckRedundant", token);
+
+	if (checkRedundantOverride)
+		return 0;
+
+	checkRedundant = token;
+	return 0;
+}
+
+int handleClearRedundantCommand()
+{
+	cleanupPatternChains();
+	initPatternChains();
+	return 0;
+}
+
+void interpretDatabase()
+{
+	initPatternChains();
+
 	uint8_t hash[SIZE_OF_SHA_256_HASH];
 	calc_sha_256(hash, rom.data, rom.size);
 
 	hashString = (char*)malloc(sizeof(char) * SIZE_OF_SHA_256_HASH * 2 + 1);
 	tempHashString = (char*)malloc(sizeof(char) * SIZE_OF_SHA_256_HASH * 2 + 1);
 
-	if (hashString == NULL) {
+	if (hashString == NULL)
+	{
 		printf("Error: Couldn't allocate memory for ROM hash string.\n");
 		return;
 	}
 
 	char* hashStringPtr = hashString;
 
-	for (int i = 0; i < SIZE_OF_SHA_256_HASH; i++) {
+	for (int i = 0; i < SIZE_OF_SHA_256_HASH; i++)
+	{
 		sprintf(hashStringPtr, "%02X", hash[i]);
 		hashStringPtr += 2;
 	}
@@ -155,12 +207,14 @@ void interpretDatabase() {
 	databaseLength = removeCarriageReturns(database, databaseLength);
 
 	char* token = updateToken(database);
-	while (token != NULL) {
-		if (!foundRom) {
-			if (strcmp(token, "Hash") == 0) {
-				if (handleHashCommand()) {
+	while (token != NULL)
+	{
+		if (!foundRom)
+		{
+			if (strcmp(token, "Hash") == 0)
+			{
+				if (handleHashCommand())
 					break;
-				}
 			}
 
 			token = updateToken(NULL);
@@ -169,12 +223,14 @@ void interpretDatabase() {
 
 		CHECK_COMMAND("Pattern", handlePatternCommand);
 		CHECK_COMMAND("Palette", handlePaletteCommand);
-		CHECK_COMMAND("Section", handleSectionCommand);
 		CHECK_COMMAND("Compression", handleCompressionCommand);
+		CHECK_COMMAND("Bitplane", handleBitplaneCommand);
+		CHECK_COMMAND("CheckRedundant", handleCheckRedundantCommand);
+		CHECK_COMMAND("ClearRedundant", handleClearRedundantCommand);
+		CHECK_COMMAND("Section", handleSectionCommand);
 
-		if (strcmp(token, "EndHash") == 0) {
+		if (strcmp(token, "EndHash") == 0)
 			break;
-		}
 
 		printf("Invalid database token: ");
 		printf(token);
@@ -182,10 +238,10 @@ void interpretDatabase() {
 		break;
 	}
 
-	if (!foundRom) {
+	if (!foundRom)
 		printf("Error: Could not match ROM with database.\n");
-	}
 
+	cleanupPatternChains();
 	free(hashString);
 	free(tempHashString);
 }
