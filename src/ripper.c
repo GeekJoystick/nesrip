@@ -379,7 +379,7 @@ int checkHasTileMatch(ExtractionContext* context, unsigned char* tileData, unsig
 	}
 
 	Pattern* hashChainPointer = hashChainStartPointer;
-	Pattern* previousHashChainPointer = hashChainStartPointer;
+	Pattern* previousHashChainPointer = NULL;
 	Pattern* downStartPointer = NULL;
 
 	while (true)
@@ -421,7 +421,10 @@ int checkHasTileMatch(ExtractionContext* context, unsigned char* tileData, unsig
 	{
 		pattern->down = downStartPointer;
 		pattern->next = downStartPointer->next;
-		previousHashChainPointer->next = pattern;
+		if (previousHashChainPointer != NULL)
+			previousHashChainPointer->next = pattern;
+		else
+			patterns[context->bitplaneType] = pattern;
 	}
 
 	return 0;
