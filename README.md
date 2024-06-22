@@ -1,6 +1,8 @@
 # nesrip
 
-This tool takes in a ROM and a graphics database file *(described further down)*, and automatically extracts graphics from the ROM.
+This tool automatically rips graphics from a supplied NES rom into PNG sheets using a legibility palette of black, white, orange, and teal. It also has a built-in tile deduplicator that, by default, runs across sheets and removes duplicate tiles. People who create spritesheets, write PC ports, or recreate maps in TMX may find this program useful. This tool was commissioned by FitzRoyX.
+
+If you want to help add entries to the database, familiarize yourself with the included `nes_gfxdb.txt` file and YYCHR.
 
 ## Installation
 
@@ -23,7 +25,7 @@ Pre-built binaries can be downloaded from the [GitHub Releases section](https://
 
 ### Executing program
 
-#### Usage
+#### Command-Line usage
 
 ```
 nesrip.exe file [arguments]                                                                                      
@@ -38,31 +40,10 @@ Arguments:
  -r {redundancy check enable, true/false}         Set or override enabling redundancy checks
 ```
 
-### Graphics database file
+### Drag-n-Drop usage
 
-The Graphics database file is used by **nesrip** to match the given ROM to a set of commands written for extracting its graphics.
-The file contains a number of **description blocks**, each of them containing a SHA-256 hash of a ROM, and a list of commands that determine palette indices, pattern sizes, decompression algorithms and finally the ROM addresses of the graphics data.
-
-#### Note
-
-> By default the tool will look for a graphics database file called `nes_gfxdb.txt`.
-> You can change this by using the `-d` argument when running **nesrip**
-
-> You also must provide the database file yourself.
-
-### Graphics data base commands
-
-```
-Hash {ROM SHA-256 hash}
-EndHash
-Section {Start address} {End address}
-Pattern {Pattern size, 1/2/4/8/16} {Direction, h/v}
-Palette {4 letter combination of b/o/t/w}
-Compression {compression type, raw}
-Bitplane {1/2}
-CheckRedundant {true/false}
-ClearRedundant
-```
+An included database file is used by **nesrip** to match the given ROM to a set of commands written for extracting its graphics.
+The file contains a number of **description blocks**, each of them containing the unheadered SHA-256 hash of a ROM, and a list of commands that determine palette indices, pattern sizes, decompression algorithms and finally the ROM addresses of the graphics data. The commands sandwiched between "hash" and "end" mostly mirror the ones described in the command-line section.
 
 ### Compression types
 
@@ -76,21 +57,19 @@ ClearRedundant
 
 ```
 //Spacegulls
-Hash B69BD1809E26400336AF288BC04403C00D77030B931BC31875594C9A0AE92F67
-Pattern 1 h
-Palette botw
-Section bg 00000 FFFFF
-EndHash
+hash b69bd1809e26400336af288bc04403c00d77030b931bc31875594c9a0ae92f67
+p 1 h
+i botw
+s bg 00000 ffff
+end
 
 //Micro Mages
-Hash A4B5B736A84B260314C18783381FE2DCA7B803F7C29E78FB403A0F9087A7E570
-Pattern 1 v
-Palette btow
-Section spr 8000 8FFF
-Section bg 9000 9FFF
-EndHash
-
-...
+hash a4b5b736a84b260314c18783381fe2dca7b803f7c29e78fb403a0f9087a7e570
+p 1 v
+i btow
+s spr 8000 8fff
+s bg 9000 9fff
+end
 ```
 
 #### Note
