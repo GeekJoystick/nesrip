@@ -42,18 +42,9 @@ Arguments:
 
 ### Drag-n-Drop usage
 
-An included database file is used by **nesrip** to match the given ROM to a set of commands written for extracting its graphics.
-The file contains a number of **description blocks**, each of them containing the unheadered SHA-256 hash of a ROM, and a list of commands that determine palette indices, pattern sizes, decompression algorithms and finally the ROM addresses of the graphics data. The commands sandwiched between "hash" and "end" mostly mirror the ones described in the command-line section.
+Drag a rom onto the exe and it will extract if a database entry is found. The included database file uses commands sandwiched between "hash" and "end" that closely mirror the ones described in the command-line section. SHA-256 of unheadered data is the hash method used. Note that no compression types are supported at this time.
 
-### Compression types
-
-* `raw`: Uncompressed graphics
-
-#### Note
-
-> No compression algorithm is supported at the moment
-
-### Example database file
+### Example database formatting
 
 ```
 //Spacegulls
