@@ -1,6 +1,6 @@
 # nesrip
 
-This tool automatically rips graphics from a supplied NES rom into PNG sheets using a legibility palette of black, white, orange, and teal. It also has a built-in tile deduplicator that, by default, runs across sheets and removes duplicate tiles. People who create spritesheets, write PC ports, or recreate maps in TMX may find this program useful. This tool was commissioned by FitzRoyX.
+This tool rips graphics from NES roms into PNG sheets. It uses a legibility palette of black, white, orange, and teal. It also deduplicates tiles by default. People who create spritesheets, write PC ports, or recreate maps in TMX may find this program useful. This tool was commissioned by FitzRoyX.
 
 If you want to help add entries to the database, familiarize yourself with the included `nes_gfxdb.txt` file and YYCHR.
 
@@ -42,7 +42,7 @@ Arguments:
 
 ### Drag-n-Drop usage
 
-Drag a rom onto the exe and it will extract if a database entry is found. The included database file uses commands sandwiched between "hash" and "end" that closely mirror the ones described in the command-line section. SHA-256 of unheadered data is the hash method used. Note that no compression types are supported at this time.
+Drag a rom onto the exe and it will extract if a database entry is found. The included database file uses commands sandwiched between "hash" and "end" that closely mirror the ones described in the command-line section. SHA-256 of unheadered data is the hash method used. Note that no compression types are supported yet.
 
 ### Example database formatting
 
