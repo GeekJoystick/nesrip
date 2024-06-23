@@ -53,15 +53,15 @@ The file contains a number of **description blocks**, each of them containing a 
 ### Graphics data base commands
 
 ```
-Hash {ROM SHA-256 hash}
-EndHash
-Section {Start address} {End address}
-Pattern {Pattern size, 1/2/4/8/16} {Direction, h/v}
-Palette {4 letter combination of b/o/t/w}
-Compression {compression type, raw}
-Bitplane {1/2}
-CheckRedundant {true/false}
-ClearRedundant
+hash {ROM SHA-256 hash}
+end
+s {Start address} {End address}                (Rip graphics from rom between start address and end address)
+p {Pattern size, 1/2/4/8/16} {Direction, h/v}  (Set extraction pattern size and direction)
+i {4 letter combination of b/o/t/w}            (Set palette used for rendering extracted graphics: [b]lack, [o]range, [t]eal, [w]hite)
+c {compression type, raw}                      (Set graphics compression algorithm)
+b {1/2}                                        (Set bitplane type: [1]bpp, [2]bpp)
+r {true/false}                                 (Enable or disable tile redundancy checks)
+k                                              (Clear the tile redundancy check cache)
 ```
 
 ### Compression types
