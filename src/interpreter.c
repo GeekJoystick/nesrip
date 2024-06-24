@@ -211,7 +211,7 @@ void interpretDatabase()
 	{
 		if (!foundRom)
 		{
-			if (strcmp(token, "Hash") == 0)
+			if (strcmp(token, "hash") == 0)
 			{
 				if (handleHashCommand())
 					break;
@@ -221,15 +221,15 @@ void interpretDatabase()
 			continue;
 		}
 
-		CHECK_COMMAND("Pattern", handlePatternCommand);
-		CHECK_COMMAND("Palette", handlePaletteCommand);
-		CHECK_COMMAND("Compression", handleCompressionCommand);
-		CHECK_COMMAND("Bitplane", handleBitplaneCommand);
-		CHECK_COMMAND("CheckRedundant", handleCheckRedundantCommand);
-		CHECK_COMMAND("ClearRedundant", handleClearRedundantCommand);
-		CHECK_COMMAND("Section", handleSectionCommand);
+		CHECK_COMMAND("p", handlePatternCommand);
+		CHECK_COMMAND("i", handlePaletteCommand);
+		CHECK_COMMAND("c", handleCompressionCommand);
+		CHECK_COMMAND("b", handleBitplaneCommand);
+		CHECK_COMMAND("r", handleCheckRedundantCommand);
+		CHECK_COMMAND("k", handleClearRedundantCommand);
+		CHECK_COMMAND("s", handleSectionCommand);
 
-		if (strcmp(token, "EndHash") == 0)
+		if (strcmp(token, "end") == 0)
 			break;
 
 		printf("Invalid database token: ");

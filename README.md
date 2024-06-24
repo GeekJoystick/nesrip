@@ -1,6 +1,9 @@
 # nesrip
 
-This tool rips graphics from NES roms into PNG sheets. It uses a legibility palette of black, white, orange, and teal. It also deduplicates tiles by default. People who create spritesheets, write PC ports, or recreate maps in TMX may find this program useful. This tool was commissioned by FitzRoyX.
+This tool rips graphics from NES roms into PNG sheets. 
+It uses a legibility palette of black, white, orange, and teal. It also deduplicates tiles by default. 
+People who create spritesheets, write PC ports, or recreate maps in TMX may find this program useful. 
+This tool was commissioned by FitzRoyX.
 
 If you want to help add entries to the database, familiarize yourself with the included `nes_gfxdb.txt` file and YYCHR.
 
@@ -40,9 +43,39 @@ Arguments:
  -r {redundancy check enable, true/false}         Set or override enabling redundancy checks
 ```
 
+If no `-S` argument is specified when running **nesrip**, the tool will look for a graphics database file named `nes_gfxdb.txt`,
+find the ROMs corresponding **description block** if it exists, and execute it.
+Other passed arguments in the command then serve as overrides to the commands in the **description block**.
+You can change the used database file by using the `-d` argument when running **nesrip**
+
 ### Drag-n-Drop usage
 
-Drag a rom onto the exe and it will extract if a database entry is found. The included database file uses commands sandwiched between "hash" and "end" that closely mirror the ones described in the command-line section. SHA-256 of unheadered data is the hash method used. Note that no compression types are supported yet.
+Drag a rom onto the exe and it will extract if a database entry is found in the included database file. 
+
+### Graphics database file
+
+The Graphics database file is used by **nesrip** to match the given ROM to a set of commands written for extracting its graphics.
+The file contains a number of **description blocks**, each of them containing a SHA-256 hash of an unheadered ROM, and a list of commands contained between the `hash` and `end` commands.
+Commands determine palette indices, pattern sizes, decompression algorithms and finally the ROM addresses of the graphics data.
+
+
+### Graphics data base commands
+
+```
+hash {ROM SHA-256 hash}                        (Begin a description block)
+end                                            (End a description block)
+s {Start address} {End address}                (Rip graphics from rom between start address and end address)
+p {Pattern size, 1/2/4/8/16} {Direction, h/v}  (Set extraction pattern size and direction)
+i {4 letter combination of b/o/t/w}            (Set palette used for rendering extracted graphics: [b]lack, [o]range, [t]eal, [w]hite)
+c {compression type, raw}                      (Set graphics compression algorithm)
+b {1/2}                                        (Set bitplane type: [1]bpp, [2]bpp)
+r {true/false}                                 (Enable or disable tile redundancy checks)
+k                                              (Clear the tile redundancy check cache)
+```
+
+### Compression types
+
+* `raw`: Uncompressed graphics
 
 ### Example database formatting
 
