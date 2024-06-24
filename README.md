@@ -1,6 +1,11 @@
 # nesrip
 
-This tool takes in a ROM and a graphics database file *(described further down)*, and automatically extracts graphics from the ROM.
+This tool rips graphics from NES roms into PNG sheets. 
+It uses a legibility palette of black, white, orange, and teal. It also deduplicates tiles by default. 
+People who create spritesheets, write PC ports, or recreate maps in TMX may find this program useful. 
+This tool was commissioned by FitzRoyX.
+
+If you want to help add entries to the database, familiarize yourself with the included `nes_gfxdb.txt` file and YYCHR.
 
 ## Installation
 
@@ -23,7 +28,7 @@ Pre-built binaries can be downloaded from the [GitHub Releases section](https://
 
 ### Executing program
 
-#### Usage
+#### Command-Line usage
 
 ```
 nesrip.exe file [arguments]                                                                                      
@@ -38,23 +43,27 @@ Arguments:
  -r {redundancy check enable, true/false}         Set or override enabling redundancy checks
 ```
 
+If no `-S` argument is specified when running **nesrip**, the tool will look for a graphics database file named `nes_gfxdb.txt`,
+find the ROMs corresponding **description block** if it exists, and execute it.
+Other passed arguments in the command then serve as overrides to the commands in the **description block**.
+You can change the used database file by using the `-d` argument when running **nesrip**
+
+### Drag-n-Drop usage
+
+Drag a rom onto the exe and it will extract if a database entry is found in the included database file. 
+
 ### Graphics database file
 
 The Graphics database file is used by **nesrip** to match the given ROM to a set of commands written for extracting its graphics.
-The file contains a number of **description blocks**, each of them containing a SHA-256 hash of a ROM, and a list of commands that determine palette indices, pattern sizes, decompression algorithms and finally the ROM addresses of the graphics data.
+The file contains a number of **description blocks**, each of them containing a SHA-256 hash of an unheadered ROM, and a list of commands contained between the `hash` and `end` commands.
+Commands determine palette indices, pattern sizes, decompression algorithms and finally the ROM addresses of the graphics data.
 
-#### Note
-
-> By default the tool will look for a graphics database file called `nes_gfxdb.txt`.
-> You can change this by using the `-d` argument when running **nesrip**
-
-> You also must provide the database file yourself.
 
 ### Graphics data base commands
 
 ```
-hash {ROM SHA-256 hash}
-end
+hash {ROM SHA-256 hash}                        (Begin a description block)
+end                                            (End a description block)
 s {Start address} {End address}                (Rip graphics from rom between start address and end address)
 p {Pattern size, 1/2/4/8/16} {Direction, h/v}  (Set extraction pattern size and direction)
 i {4 letter combination of b/o/t/w}            (Set palette used for rendering extracted graphics: [b]lack, [o]range, [t]eal, [w]hite)
@@ -68,29 +77,23 @@ k                                              (Clear the tile redundancy check 
 
 * `raw`: Uncompressed graphics
 
-#### Note
-
-> No compression algorithm is supported at the moment
-
-### Example database file
+### Example database formatting
 
 ```
 //Spacegulls
-Hash B69BD1809E26400336AF288BC04403C00D77030B931BC31875594C9A0AE92F67
-Pattern 1 h
-Palette botw
-Section bg 00000 FFFFF
-EndHash
+hash b69bd1809e26400336af288bc04403c00d77030b931bc31875594c9a0ae92f67
+p 1 h
+i botw
+s bg 00000 ffff
+end
 
 //Micro Mages
-Hash A4B5B736A84B260314C18783381FE2DCA7B803F7C29E78FB403A0F9087A7E570
-Pattern 1 v
-Palette btow
-Section spr 8000 8FFF
-Section bg 9000 9FFF
-EndHash
-
-...
+hash a4b5b736a84b260314c18783381fe2dca7b803f7c29e78fb403a0f9087a7e570
+p 1 v
+i btow
+s spr 8000 8fff
+s bg 9000 9fff
+end
 ```
 
 #### Note
